@@ -1,0 +1,100 @@
+---
+title: "day 9 comp"
+author: "Kiran Favre"
+date: "2022-08-18"
+output: html_document
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(palmerpenguins)
+
+```
+
+## Google workshop
+
+Practice:
+
+Example 1) with data sets a and b. Each contain the same attributes
+(columns). Identify which records (rows of data) in data table a are not
+contained in data table b.
+
+```{r}
+a <- data.frame(month = c("October", "November", "December", "January", "February"), season = c("Fall", "Fall", "Winter", "Winter", "Winter"), daylight_savings = c("yes", "partly", "no", "no", "no"))
+
+b <- data.frame(month = c("October", "December", "February"), season = c("Fall", "Winter", "Winter"), daylight_savings = c("yes", "no", "no"))
+
+a_not_b <- anti_join(x = a, y = b, by = "month") #anti_join returns all rows from x without a match in y
+```
+
+Example 2) Modify the following code such that it sorts any blue animals
+from the animals vector into the blue_animals vector.
+
+```{r}
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##  ~ vector of animals  ----
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~
+animals <- c("blue tang", "red panda", "Blue jay",
+             "green sea turtle", "blue morpho butterfly", 
+             "Blue iguana", "Red squirrel")
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##  ~ initialize empty vector to store blue-colored animals  ----
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+blue_animals <- c()
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##  ~ sort blue animals into their own list  ----
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+for (i in 1:length(animals)){
+  current_animal <- animals[i]
+  if(isTRUE(str_detect(current_animal, fixed("blue", ignore_case = TRUE)))){  
+    message("The '", current_animal, "' is a blue animal")
+    blue_animals <- append(blue_animals, current_animal)
+  }
+}
+#taking a look at 1st animal name, if blue is in first item, print this message, and store in blue animals vector
+# Problem: cases-- we need to be able to ignore the case because some are upper case
+  # can also use "(?i)blue" in the str_detect fxn
+# Problem: the values being saved to blue_animals is only saving the last value
+  # soln: use append
+```
+
+Example 3: Modify code to recreate given plot
+
+```{r}
+
+ggplot(data = na.omit(penguins), aes(x = species, y = body_mass_g, shape = sex, fill = species)) +
+  geom_point(alpha = 0.5, position = position_jitterdodge(dodge.width = 0.5)) + 
+  # means & standard devs
+  stat_summary(mapping = aes(color = species), 
+               position = position_dodge(width = 0.5),
+               fun = "mean", 
+               geom = "point", size = 4) +
+  stat_summary(mapping = aes(color = species),
+               position = position_dodge(width = 0.5),
+               fun = "mean", geom = "errorbar", size = 1, width = 0.2,
+               fun.max = function(x) mean(x) + sd(x),
+               fun.min = function(x) mean(x) - sd(x)) +
+  # change colors/shapes
+  scale_color_manual(values = c("orange", "purple", "cyan4")) + 
+  scale_shape_manual(values = c(15, 16), name = "Sex") + 
+  # add nicer axis labels + title + caption
+  labs(x = "Penguin Species", 
+       y = "Body Mass (g)",
+       title = "Body mass of female vs. male adelie, chinstrap, and gentoo penguins",
+       subtitle = "Colored points represent mean body mass (± SD)",
+       caption = "Data Source: Dr. Kristen Gorman, LTER Palmer Station") +
+  theme_classic() + 
+  theme(plot.title = element_text(hjust = 0, size = 14),
+        axis.text = element_text(color = "black", size = 10),
+        axis.title = element_text(color = "black", size = 14),
+        plot.caption = element_text(size = 7, hjust = 1, color = "gray", face = 
+                                      "italic"),
+        panel.border = element_rect(color = "black", size = 0.7, fill = NA))
+```
+
+-   dodge vs jitter_dodge: jitter put some space between points, but
+    dodge spaces out errything
